@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+
+from toposort        import toposort
+from subprocess      import Popen
+from build_spec      import BuildSpec
+import sys
+
+def main():
+    message, spec = BuildSpec.Validate("spec.json")
+    if message is not None:
+        print message
+        sys.exit(1)
+
+    build_spec = BuildSpec(spec)
+    dep_graph = build_spec.DependencyGraph() if len(sys.argv) == 1\
+            else build_spec.SubDependencyGraph(sys.argv[1])
+
+    for build_group in toposort(dep_graph):
+        commands = [
+            (item, build_spec.GetRuleFor(item)["command"])\
+            for item in build_group\
+            if build_spec.IsStale(item)
+        ]
+
+        if len(commands) > 0:
+            print "Running:"
+            for _, c in commands:
+                print "[*] " + c
+
+        group_tasks = [
+            (rule, Popen(command.split(" ")))\
+            for rule, command in commands
+        ]
+
+        for rule, task in group_tasks:
+            task.wait()
+            if task.returncode == 0:
+                build_spec.BuiltRule(rule)
+            else:
+                print "error building " + rule
+                sys.exit(1)
+
+if __name__ == "__main__":
+    main()
