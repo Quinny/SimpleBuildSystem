@@ -97,13 +97,17 @@ class BuildSpec:
         # Check for input file changes or stale dependencies.
         input_files = self.GetRuleFor(name)["input_files"]
         last_modified_times = map(os.path.getmtime, input_files)
-        any_files_changed = any(last_modified > self._last_built[name]\
-                for last_modified in last_modified_times)
-        any_stale_deps = any(self._last_built[dep] > self._last_built[name]\
-                for dep in self._dependency_graph.get(name, []))
+        any_files_changed = any(
+            last_modified > self._last_built[name]
+            for last_modified in last_modified_times
+        )
+        any_stale_deps = any(
+            self._last_built[dep] > self._last_built[name]
+            for dep in self._dependency_graph.get(name, [])
+        )
         return any_files_changed or any_stale_deps
 
-    # Update the build time of a rule.
+    # Update the build time of a rule to the current time.
     def BuiltRule(self, name):
         self._last_built[name] = time.time()
         with open(".sbsbt", "w") as f:

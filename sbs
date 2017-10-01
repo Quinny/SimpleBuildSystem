@@ -17,8 +17,8 @@ def main():
 
     for build_group in toposort(dep_graph):
         commands = [
-            (item, build_spec.GetRuleFor(item)["command"])\
-            for item in build_group\
+            (item, build_spec.GetRuleFor(item)["command"])
+            for item in build_group
             if build_spec.IsStale(item)
         ]
 
@@ -28,7 +28,7 @@ def main():
                 print "[*] " + c
 
         group_tasks = [
-            (rule, Popen(command.split(" ")))\
+            (rule, Popen(command.split(" ")))
             for rule, command in commands
         ]
 
