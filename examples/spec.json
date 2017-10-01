@@ -1,0 +1,21 @@
+{
+  "builds": [
+    {
+      "name": "animal",
+      "command": "g++ animal.cc -c -o lib/animal.o",
+      "input_files": ["animal.cc", "animal.h"]
+    },
+    {
+      "name": "dog",
+      "command": "g++ dog.cc lib/animal.o -c -o lib/dog.o",
+      "input_files": ["dog.cc", "dog.h"],
+      "deps": ["animal"]
+    },
+    {
+      "name": "main",
+      "command": "g++ main.cc lib/dog.o -o bin/main.out",
+      "deps": ["dog"],
+      "input_files": ["main.cc"]
+    }
+  ]
+}
